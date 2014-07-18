@@ -5,5 +5,6 @@ Error handling routes for use in Artsy's web apps. Very specific to Artsy's [Eze
 ## Example
 
 ````coffeescript
-require('artsy-error-handler')(app, template: resolve(__dirname, '../components/layout/error.jade'))
+require('artsy-error-handler') app,
+    template: resolve(__dirname, '../components/layout/error.jade')
 ````
