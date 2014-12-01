@@ -8,6 +8,7 @@ routes = require './routes'
 # See this thread: https://github.com/visionmedia/express/issues/1522
 module.exports = (app, options) ->
   routes options
+  app.use routes.backboneErrorHelper
   app.use routes.pageNotFound
   app.use routes.socialAuthError
   app.use '/users/sign_in', routes.loginError
