@@ -3,6 +3,7 @@ fs = require 'fs'
 jade = require 'jade'
 template = null
 showDetail = null
+{ NODE_ENV } = process.env
 
 module.exports = (options) ->
   template = options.template
@@ -69,3 +70,23 @@ module.exports.loginError = (err, req, res, next) ->
     when 'invalid email or password' then 403
     else 500
   res.send { error: err.message }
+
+module.exports.backboneErrorHelper = (req, res, next) ->
+  res.backboneError = (model, res) ->
+    try
+      parsed = JSON.parse res?.text
+      errorText = parsed.error
+    catch e
+      errorText = e.text
+    errorText ?= res?.error?.toString() or res?.toString()
+
+    # 403s from the API should 404 in production
+    if res?.error?.status == 403 and NODE_ENV is 'production'
+      res?.error?.status = 404
+      errorText = 'Not Found'
+
+    console.warn errorText, res?.status
+    err = new Error(errorText)
+    err.status = res?.error?.status
+    next err
+  next()

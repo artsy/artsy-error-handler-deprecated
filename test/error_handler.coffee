@@ -63,3 +63,30 @@ describe '#template', ->
 
   it 'wont render error details if showDetail if false', ->
     jade.render(fs.readFileSync(resolve __dirname + '/template.jade').toString(), { detail: 'Catty Error', showDetail: false }).should.not.containEql 'Catty Error'
+
+describe 'Backbone error', ->
+
+  beforeEach ->
+    @req = {}
+    @res = { status: sinon.stub() }
+    @next = sinon.stub()
+    errorHandler.backboneErrorHelper @req, @res, @next
+
+  it 'adds a backbone error handler helper', ->
+    @res.backboneError {}, { error: {}, text: '{"error":"Foo Err"}' }
+    @next.args[1][0].toString().should.containEql 'Foo Err'
+
+  it 'handles generic stringy errors', ->
+    @res.backboneError {}, { error: 'Foo Err' }
+    @next.args[1][0].toString().should.containEql 'Foo Err'
+
+  it 'turns 403 errors into 404s', ->
+    errorHandler.__set__ 'NODE_ENV', 'production'
+    @res.backboneError {}, { error: { status: 403 } }
+    @next.args[1][0].toString().should.containEql 'Not Found'
+
+  it 'attaches API status to the errors', ->
+    errorHandler.__set__ 'NODE_ENV', 'production'
+    @res.backboneError {}, { error: { status: 404 } }
+    @next.args[1][0].status.should.equal 404
+
