@@ -7,11 +7,12 @@ fs = require 'fs'
 errorHandler = rewire '../routes'
 
 beforeEach ->
-  errorHandler(template: __dirname + '/template.jade', showDetail: true)
+  errorHandler.template = __dirname + '/template.jade'
 
 describe '#internalError', ->
 
   it 'renders a 500 page', ->
+    errorHandler.__set__ 'NODE_ENV', 'development'
     errorHandler.internalError new Error("Some blah error"), {},
       { statusCode: 500, send: spy = sinon.spy(), status: -> }
     spy.args[0][0].should.containEql "Some blah error"
@@ -32,11 +33,10 @@ describe '#pageNotFound', ->
 
   it 'renders a 404 page', ->
     # Fake a Express request object with Accept header set
-    req = express.request
-    req.headers = Accept: 'text/html'
-    errorHandler.pageNotFound req, { send: spy = sinon.spy(), status: stub = sinon.stub() }
-    stub.args[0][0].should.equal 404
-    spy.args[0][0].should.containEql "The page you were looking for doesn't exist"
+    errorHandler.pageNotFound {}, {}, spy = sinon.spy()
+    err = spy.args[0][0]
+    err.status.should.equal 404
+    err.message.should.equal 'Not Found'
 
 describe '#socialAuthError', ->
 
@@ -55,14 +55,6 @@ describe '#socialAuthError', ->
   it 'directs social linking errors to the user edit page', ->
     errorHandler.socialAuthError "Another Account Already Linked: Twitter", { url: 'twitter' }, @res = { redirect: sinon.stub() }
     @res.redirect.args[0][0].should.equal '/user/edit?error=twitter-already-linked'
-
-describe '#template', ->
-
-  it 'renders the error message if showDetail is true', ->
-    jade.render(fs.readFileSync(resolve __dirname + '/template.jade').toString(), { detail: 'Catty Error', showDetail: true }).should.containEql 'Catty Error'
-
-  it 'wont render error details if showDetail if false', ->
-    jade.render(fs.readFileSync(resolve __dirname + '/template.jade').toString(), { detail: 'Catty Error', showDetail: false }).should.not.containEql 'Catty Error'
 
 describe 'Backbone error', ->
 
