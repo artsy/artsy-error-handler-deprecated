@@ -53,20 +53,18 @@ render = (res, data) =>
   res.send { error: err.message }
 
 @backboneErrorHelper = (req, res, next) ->
-  res.backboneError = (model, res) ->
+  res.backboneError = (model, err) ->
     try
-      parsed = JSON.parse res?.text
-      errorText = parsed.error
+      message = JSON.parse(err.text).error
     catch e
-      errorText = e.text
-    errorText ?= res?.error?.toString() or res?.toString()
-
-    # 403s from the API should 404 in production
-    if res?.error?.status == 403 and NODE_ENV is 'production'
-      res?.error?.status = 404
-      errorText = 'Not Found'
-
-    err = new Error(errorText)
-    err.status = res?.error?.status
+      message = err?.text or 'Unknown Error'
+    if err.status in [404, 403]
+      status = 404
+      message = 'Not Found'
+    else
+      status = err.status or 500
+    err = new Error
+    err.message = message
+    err.status = status
     next err
   next()

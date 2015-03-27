@@ -65,20 +65,20 @@ describe 'Backbone error', ->
     errorHandler.backboneErrorHelper @req, @res, @next
 
   it 'adds a backbone error handler helper', ->
-    @res.backboneError {}, { error: {}, text: '{"error":"Foo Err"}' }
+    @res.backboneError {}, { text: '{"error":"Foo Err"}' }
     @next.args[1][0].toString().should.containEql 'Foo Err'
 
   it 'handles generic stringy errors', ->
-    @res.backboneError {}, { error: 'Foo Err' }
+    @res.backboneError {}, { text: 'Foo Err' }
     @next.args[1][0].toString().should.containEql 'Foo Err'
 
   it 'turns 403 errors into 404s', ->
     errorHandler.__set__ 'NODE_ENV', 'production'
-    @res.backboneError {}, { error: { status: 403 } }
+    @res.backboneError {}, { status: 403 }
     @next.args[1][0].toString().should.containEql 'Not Found'
 
   it 'attaches API status to the errors', ->
     errorHandler.__set__ 'NODE_ENV', 'production'
-    @res.backboneError {}, { error: { status: 404 } }
+    @res.backboneError {}, { status: 404 }
     @next.args[1][0].status.should.equal 404
 
