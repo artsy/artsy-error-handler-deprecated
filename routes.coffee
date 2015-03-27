@@ -58,7 +58,7 @@ render = (res, data) =>
       message = JSON.parse(err.text).error
     catch e
       message = err?.text or 'Unknown Error'
-    if err.status in [404, 403]
+    if err.status in [404, 403, 401]
       status = 404
       message = 'Not Found'
     else
