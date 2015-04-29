@@ -15,7 +15,7 @@ render = (res, data) =>
 @internalError = (err, req, res, next) ->
   console.warn err.stack
   res.status err.status or 500
-  detail = (err.message or err.text or err.toString()) if NODE_ENV isnt 'production'
+  detail = (err.message or err.text or err.toString())
   render res, _.extend
     code: res.statusCode
     error: err
