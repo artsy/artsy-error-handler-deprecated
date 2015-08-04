@@ -73,12 +73,24 @@ describe 'Backbone error', ->
     @next.args[1][0].toString().should.containEql 'Foo Err'
 
   it 'turns 403 errors into 404s', ->
-    errorHandler.__set__ 'NODE_ENV', 'production'
     @res.backboneError {}, { status: 403 }
     @next.args[1][0].toString().should.containEql 'Not Found'
 
   it 'attaches API status to the errors', ->
-    errorHandler.__set__ 'NODE_ENV', 'production'
     @res.backboneError {}, { status: 404 }
     @next.args[1][0].status.should.equal 404
 
+  it 'tries stack if its not an HTTP error', ->
+    @res.backboneError {}, { stack: 'foo' }
+    @next.args[1][0].message.should.equal 'foo'
+    @next.args[1][0].status.should.equal 500
+
+  it 'tries message if its not an HTTP error', ->
+    @res.backboneError {}, { message: 'foo' }
+    @next.args[1][0].message.should.equal 'foo'
+    @next.args[1][0].status.should.equal 500
+
+  it 'will even try stringifying before unknown', ->
+    @res.backboneError {}, { foo: 'bar' }
+    @next.args[1][0].message.should.equal '{"foo":"bar"}'
+    @next.args[1][0].status.should.equal 500

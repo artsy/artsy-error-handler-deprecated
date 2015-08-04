@@ -1,7 +1,6 @@
 _ = require 'underscore'
 fs = require 'fs'
 jade = require 'jade'
-{ NODE_ENV } = process.env
 
 render = (res, data) =>
   res.send jade.compile(fs.readFileSync(@template), filename: @template)(data)
@@ -57,12 +56,13 @@ render = (res, data) =>
     try
       message = JSON.parse(err.text).error
     catch e
-      message = err?.text or err?.response?.text or 'Unknown Error'
-    if err.status in [404, 403, 401]
+      message = err?.text or err?.response?.text or err?.stack or err?.message
+      message ?= try JSON.stringify(err) catch e; 'Unknown Error'
+    if err?.status in [404, 403, 401]
       status = 404
       message = 'Not Found'
     else
-      status = err.status or 500
+      status = err?.status or 500
     err = new Error
     err.message = message
     err.status = status
