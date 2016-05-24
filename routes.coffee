@@ -12,7 +12,9 @@ render = (res, data) =>
   next err
 
 @internalError = (err, req, res, next) ->
-  console.warn err.stack
+  unless 400 <= err.status <= 499
+    console.warn err.stack
+
   res.status err.status or 500
   detail = (err.message or err.text or err.toString())
   render res, _.extend
