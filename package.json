@@ -1,6 +1,6 @@
 {
   "name": "artsy-error-handler",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Error handling routes for use in Artsy's web apps.",
   "keywords": [
     "handler",
