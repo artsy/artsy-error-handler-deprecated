@@ -1,29 +1,31 @@
 _ = require 'underscore'
 fs = require 'fs'
 jade = require 'jade'
+debug = require('debug') 'artsy-error-handler'
 
 render = (res, data) =>
-  res.send jade.compile(fs.readFileSync(@template), filename: @template)(data)
+  res.send jade.compile(
+    fs.readFileSync(module.exports.template),
+    filename: module.exports.template
+  )(data)
 
-@pageNotFound = (req, res, next) ->
+module.exports.pageNotFound = (req, res, next) ->
   err = new Error
   err.status = 404
   err.message = 'Not Found'
   next err
 
-@internalError = (err, req, res, next) ->
-  unless 400 <= err.status <= 499
-    console.warn err.stack
-
+module.exports.internalError = (err, req, res, next) ->
+  debug err.stack
   res.status err.status or 500
-  detail = (err.message or err.text or err.toString())
+  detail = err.message or err.text or err.toString()
   render res, _.extend
     code: res.statusCode
     error: err
     detail: detail
   , res.locals
 
-@socialAuthError = (err, req, res, next) ->
+module.exports.socialAuthError = (err, req, res, next) ->
   if err.toString().match('User Already Exists')
     # Error urls need to be compatible with Gravity
     params =
@@ -47,13 +49,13 @@ render = (res, data) =>
   else
     next err
 
-@loginError = (err, req, res, next) ->
+module.exports.loginError = (err, req, res, next) ->
   res.status switch err.message
     when 'invalid email or password' then 403
     else 500
   res.send { error: err.message }
 
-@backboneErrorHelper = (req, res, next) ->
+module.exports.backboneErrorHelper = (req, res, next) ->
   res.backboneError = (model, err) ->
     try
       message = JSON.parse(err.text).error
@@ -70,3 +72,4 @@ render = (res, data) =>
     err.status = status
     next err
   next()
+

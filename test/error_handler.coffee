@@ -3,7 +3,6 @@ sinon = require 'sinon'
 express = require 'express'
 jade = require 'jade'
 fs = require 'fs'
-{ resolve } = require 'path'
 errorHandler = rewire '../routes'
 
 beforeEach ->

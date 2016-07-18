@@ -1,6 +1,6 @@
 {
   "name": "artsy-error-handler",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "Error handling routes for use in Artsy's web apps.",
   "keywords": [
     "handler",
@@ -23,14 +23,15 @@
     "test": "mocha"
   },
   "dependencies": {
-    "jade": "*",
-    "underscore": "*"
+    "debug": "^2.2.0",
+    "jade": "^1.11.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "coffee-script": "*",
-    "should": "*",
-    "express": "*",
-    "sinon": "*",
-    "rewire": "*"
+    "coffee-script": "^1.10.0",
+    "express": "^4.14.0",
+    "rewire": "^2.5.2",
+    "should": "^10.0.0",
+    "sinon": "^1.17.4"
   }
 }
