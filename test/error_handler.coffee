@@ -10,23 +10,35 @@ beforeEach ->
 
 describe '#internalError', ->
 
+  beforeEach ->
+    @req =
+      accepts: sinon.stub()
+    @res =
+      statusCode: 500
+      send: sinon.spy()
+      status: sinon.stub()
+      locals:{}
+    @next = sinon.stub()
+
   it 'renders a 500 page', ->
     errorHandler.__set__ 'NODE_ENV', 'development'
-    errorHandler.internalError new Error("Some blah error"), {},
-      { statusCode: 500, send: spy = sinon.spy(), status: -> }
-    spy.args[0][0].should.containEql "Some blah error"
+    errorHandler.internalError new Error("Some blah error"), @req, @res, @next
+    @res.send.args[0][0].should.containEql "Some blah error"
 
   it 'sends a 500 by default', ->
-    errorHandler.internalError new Error("Some blah error"), {},
-      { statusCode: 500, send: spy = sinon.spy(), status: status = sinon.stub() }
-    status.args[0][0].should.equal 500
+    errorHandler.internalError new Error("Some blah error"), @req, @res
+    @res.status.args[0][0].should.equal 500
 
   it 'will look at the errors status', ->
     err = new Error("Some blah error")
     err.status = 404
-    errorHandler.internalError err, {},
-      { statusCode: 500, send: spy = sinon.spy(), status: status = sinon.stub() }
-    status.args[0][0].should.equal 404
+    errorHandler.internalError err, @req, @res
+    @res.status.args[0][0].should.equal 404
+
+  it 'sends json', ->
+    @req.accepts.returns 'application/json'
+    errorHandler.internalError new Error("Some blah error"), @req, @res
+    @res.send.args[0][0].message.should.equal "Some blah error"
 
 describe '#pageNotFound', ->
 
