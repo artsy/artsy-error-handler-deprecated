@@ -19,11 +19,21 @@ module.exports.internalError = (err, req, res, next) ->
   debug err.stack
   res.status err.status or 500
   detail = err.message or err.text or err.toString()
-  render res, _.extend
-    code: res.statusCode
-    error: err
-    detail: detail
-  , res.locals
+  if req.accepts 'application/json'
+    res.send
+      code: res.statusCode
+      message: detail
+      stack: err.stack
+  else
+    # Error templates tend to expect an `asset` local to pull down JS/CSS for
+    # the layout but if the CDN fails, or something up the chain above
+    # bucket-assets fails then we should still render something.
+    res.locals.asset ?= (filename) -> filename
+    render res, _.extend
+      code: res.statusCode
+      error: err
+      detail: detail
+    , res.locals
 
 module.exports.socialAuthError = (err, req, res, next) ->
   if err.toString().match('User Already Exists')
