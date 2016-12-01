@@ -12,7 +12,7 @@ describe '#internalError', ->
 
   beforeEach ->
     @req =
-      accepts: sinon.stub()
+      is: sinon.stub()
     @res =
       statusCode: 500
       send: sinon.spy()
@@ -36,7 +36,7 @@ describe '#internalError', ->
     @res.status.args[0][0].should.equal 404
 
   it 'sends json', ->
-    @req.accepts.returns 'application/json'
+    @req.is.returns true
     errorHandler.internalError new Error("Some blah error"), @req, @res
     @res.send.args[0][0].message.should.equal "Some blah error"
 
