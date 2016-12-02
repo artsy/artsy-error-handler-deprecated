@@ -19,7 +19,7 @@ module.exports.internalError = (err, req, res, next) ->
   debug err.stack
   res.status err.status or 500
   detail = err.message or err.text or err.toString()
-  if req.accepts 'application/json'
+  if req.is('application/json')
     res.send
       code: res.statusCode
       message: detail
